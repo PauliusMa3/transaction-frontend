@@ -1,0 +1,24 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+
+  html, body {
+    padding: 0;
+    margin: 0;
+  }
+
+  body {
+    font-family: 'Lato';
+    font-weight: 400;
+    min-height: 100vh;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+}
+
+
+
+
+
