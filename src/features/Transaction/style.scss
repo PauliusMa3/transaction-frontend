@@ -1,6 +1,22 @@
 .transaction-widget-container {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    .transaction-widget-grid {
+        flex-shrink: 0;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        gap: 20px;
+    }
+
+    .commission-info-block {
+        font-size: 2rem;
+        margin-top: 4rem;
+        border-radius: 1rem;
+        box-shadow: var(--shadowColor);
+        padding: 2rem;
+    }
 }

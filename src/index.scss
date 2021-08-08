@@ -6,6 +6,35 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+html {
+  font-size: 62.5%;
+  --color-primary: #0198e1;
+  --color-secondary: #e5e5e5;
+  --color-tertiary: #fff;
+  --color-error: #ff0033;
+  --shadowColor: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  --color-text: #263238;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-weight: 400;
+  min-height: 100vh;
+  font-size: 2rem;
+  color: var(--color-text);
+}
+
+p,label {
+  font-size: 1.4rem;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

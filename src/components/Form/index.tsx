@@ -1,100 +1,133 @@
-import {useEffect, useState} from "react";
 import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from '@hookform/resolvers/yup';
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import Select from 'react-select'
+import Select from "react-select";
 import Loader from "react-loader-spinner";
-import axios from "axios";
-import { API_URL } from "../../constants";
-import './style.scss'
+import "./style.scss";
+import Input from "./Input";
+import { IOptionItem } from "features/Transaction";
+import moment from "moment";
+
+export const typeErrorMessages = {
+  invalidDate: "You must specify date in format: YYYY-MM-DD",
+  invalidNumber: "You must specify a number"
+};
 
 const schema = yup.object().shape({
-    date: yup.date().required(),
-    amount: yup.number().required(),
-    currency: yup.string().required(),
-    clientId: yup.number().integer()
-  });
+  date: yup
+    .date()
+    .typeError(typeErrorMessages.invalidDate)
+    .transform(function (value: any) {
+      const parsed = moment(value, "YYYY-MM-DD", true);
+      return parsed.isValid() ? parsed.toDate() : new Date("");
+    })
+    .required("Required"),
+  amount: yup.number().typeError(typeErrorMessages.invalidNumber).required(""),
+  currency: yup.string().required("You must select currency"),
+  client_id: yup
+    .number()
+    .integer()
+    .typeError(typeErrorMessages.invalidNumber)
+    .required("Required")
+});
 
-interface IOptionItem {
-    label: string,
-    value: string
+export interface IFormData {
+  client_id: string;
+  amount: string;
+  currency: string;
+  date: string;
 }
 
-const Form  = () => {
-    const [status, setStatus] = useState('idle');
-    const [error, setError] = useState(null);
-    const [currencyList, setCurrencyList] = useState<IOptionItem[]>([]);
+interface IFormProps {
+  status: string;
+  currencyList: IOptionItem[];
+  onSubmit: (formData: IFormData) => void;
+  error: any;
+}
 
-    useEffect(() => {
-        const fetchCurrencyOptions = async () => {
-            try {
-                const {data} = await axios.get(`${API_URL}/transaction/currencies`);
-                const currencyList:any = Object.keys(data?.rates).map((key:string) => ({label:key, value:key}))
-                setCurrencyList(currencyList)
-                setStatus('resolved');
-            } catch(e: any) {
-                setError(e.message);
-                setStatus('rejected');
-            }
-        }
-            fetchCurrencyOptions()
-    }, [])
-
-
-  const { handleSubmit, control, register,formState: { errors } } = useForm({
-    resolver: yupResolver(schema),
+const Form = ({ currencyList, status, onSubmit, error }: IFormProps) => {
+  const {
+    handleSubmit,
+    control,
+    register,
+    formState: { errors, isSubmitting },
+    reset
+  } = useForm({
+    resolver: yupResolver(schema)
   });
-  const onSubmit = async(formData: any) => {
-    try {
-        const {data: commision} = await axios.post(`${API_URL}/transaction`, {
-            formData
-        });
-        console.log('currencies: ', commision);
-        setStatus('resolved');
-    } catch(e: any) {
-        setError(e.message);
-        setStatus('rejected');
-    }
-  }
 
-  const isLoading = status === 'idle';
+  const isLoading = status === "idle" || isSubmitting;
 
+  const onFormSubmit = (formData: IFormData) => {
+    const { date, amount } = formData;
+    const requestFormData = {
+      ...formData,
+      date: moment(date).format("YYYY-MM-DD"),
+      amount: amount.toString()
+    };
+
+    onSubmit(requestFormData);
+    reset();
+  };
   return (
-      <div className='form-container'>
-          {
-              isLoading ?
-              <Loader
-              type="Puff"
-              color="#00BFFF"
-              height={100}
-              width={100}
-              timeout={3000} //3 secs
-            /> : null
-          }
-          {
-              !isLoading && error ? (
-                <form onSubmit={handleSubmit(onSubmit)}>
-                <input {...register("clientId")} placeholder='Client Id'/>
-                {errors.clientId?.message ? <p>{errors.clientId?.message}</p> : null}
-                <input {...register("amount")} placeholder={'Amount'} />
-                {errors.amount?.message ? <p>{errors.amount?.message}</p> : null}
-                <input {...register("date")} placeholder='Date'/>
-                {errors.date?.message ? <p>{errors.date?.message}</p> : null}
-                <Controller
-                    name="currency"
-                    control={control}
-                    render={({ field }) => <Select
-                      {...field}
-                      options={currencyList}
-                    />}
-                  />
-                    <button type='submit'>Submit</button>
-                </form>
-              ) : null
-          }
+    <div className="form-container">
+      {!isLoading && error ? <p className="error-message">{error}</p> : null}
+      {isLoading ? (
+        <Loader type="TailSpin" color="#0198E1" height={100} width={100} />
+      ) : null}
+      {!isLoading ? (
+        <form onSubmit={handleSubmit(onFormSubmit)}>
+          <h2>Transaction Form</h2>
+          <Input
+            name={"client_id"}
+            label="Client Id"
+            register={register}
+            error={errors["client_id"]}
+          />
 
-      </div>
+          <Input
+            name={"amount"}
+            label="Amount"
+            register={register}
+            error={errors["amount"]}
+          />
+
+          <Input
+            name={"date"}
+            label="Date"
+            register={register}
+            error={errors["date"]}
+          />
+          <>
+            <Controller
+              name="currency"
+              control={control}
+              render={({ field: { onChange, value, ref } }) => (
+                <div className="select-container">
+                  <label>Currency</label>
+                  <Select
+                    inputRef={ref}
+                    classNamePrefix="addl-class"
+                    options={currencyList}
+                    value={currencyList.find((c) => c.value === value)}
+                    onChange={(val) => {
+                      if (val) {
+                        onChange(val.value);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            />
+            {errors["currency"] ? (
+              <p className="error-message">{errors["currency"].message}</p>
+            ) : null}
+          </>
+          <button type="submit">Submit</button>
+        </form>
+      ) : null}
+    </div>
   );
-}
+};
 
 export default Form;

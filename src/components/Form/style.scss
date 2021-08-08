@@ -1,35 +1,38 @@
 .form-container {
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-    width: 40%;
-
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadowColor);
+    width: min(90%, 600px);
+    .error-message {
+        font-size: 1rem;
+        color: var(--color-error);
+    }
     form {
         display: grid;
-        gap: 20px;
+        gap: 2rem;
 
         button {
             border: none;
-            padding: 8px 10px;
-            border-radius: 8px;
-            background: #0198E1;
-            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 0.8rem;
+            background: var(--color-primary);
+            color: var(--color-tertiary);
             opacity: 1;
             transition: opacity linear 0.3s;
             max-width: 50%;
             cursor: pointer;
-            min-height: 44px;
+            min-height: 4.4rem;
             &:hover {
                 opacity: 0.8;
             }
         }
     }
-
-    input {
-        border: 1px solid #e5e5e5;
-        border-radius: 5px;
-        padding: 8px 10px;
-        font-size: 20px;
-        line-height: 26px;
+}
+.select-container {
+    display: grid;
+    grid-gap: 1rem;
+    gap: 1rem;
+    label {
+        justify-self: start;
     }
 }
